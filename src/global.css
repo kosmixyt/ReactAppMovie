@@ -1,0 +1,64 @@
+@import url('http://fonts.cdnfonts.com/css/bebas-neue');
+@import url('http://fonts.cdnfonts.com/css/fty-skorzhen-ncv');
+
+body {
+    background: black;
+    margin: 0px;
+    /* font-family: 'Roboto', sans-serif; */
+    color: #e5e5e5;
+    /*overflow-y: hidden;*/
+    user-select: none;
+}
+
+.swiper-container {
+    width: 480px;
+}
+
+@media screen and (min-width: 640px) {
+    .swiper-container {
+        width: 640px;
+    }
+}
+
+@media screen and (min-width: 768px) {
+    .swiper-container {
+        width: 768px;
+    }
+}
+
+
+.contener-data-img {
+    max-height: 100%;
+    max-width : 100%;
+    border-radius: 0.3em;
+
+
+
+}
+
+.Raison-swiper{
+    font-size: 20px;
+
+}
+
+.contener-data{
+
+    margin: 0px;
+}
+
+.contener-data-title{
+
+    font-family: 'FTY SKORZHEN NCV', sans-serif;
+    font-size : 117%;
+}
+.contener-data-title:hover{
+    text-decoration: underline;
+}
+
+.cent{
+    position : relative;
+    user-select: none;
+    top : 24%;
+    left : 5%;
+}
+
