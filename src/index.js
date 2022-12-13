@@ -348,6 +348,8 @@ const Modal = function (data){
                                     }}
 
 
+
+
                                     >
                                         <LazyLoad>
                                             <img
