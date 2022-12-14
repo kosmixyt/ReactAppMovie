@@ -7,14 +7,15 @@ import ReactDom, { createPortal } from "react-dom";
 import withReactContent from "sweetalert2-react-content";
 import { Animated } from "react-animated-css";
 import "./global.css";
-import dl from './dl.svg';
+import dl from "./dl.svg";
 import { useState, useEffect, useRef } from "react";
 import { Portal } from "react-portal";
 import play from "./play.svg";
 import addtol from "./addtol.svg";
 import muted from "./muted.svg";
+import closeModal from "./cameback.svg";
 import sound from "./sound.svg";
-import audio from './audio.svg'
+import audio from "./audio.svg";
 import like from "./like.svg";
 import "animate.css";
 import { useDispatch, useSelector } from "react-redux";
@@ -22,6 +23,7 @@ import LazyLoad from "react-lazy-load";
 import React from "react";
 import { ToastContainer, toast } from "react-toastify";
 import fourk from "./quality/no.svg";
+import portal from "react-portal/lib/Portal";
 // import "react-toastify/dist/ReactToastify.css";
 
 const root = ReactDom.createRoot(document.getElementById("root"));
@@ -79,7 +81,7 @@ const loadHomepage = function () {
   });
 };
 async function loadItem(item_uuid) {
-    console.log(("fetching item"))
+  console.log("fetching item");
   var res = await axios
     .get("http://localhost/api/library/item?itemuuid=" + item_uuid)
     .catch((e) => HandLeError(e, "item"));
@@ -105,30 +107,41 @@ function BuilDHomePage() {
   var MostViewedCatSeries = homepage.arrayofMosts;
   const [modalInfo, setModalInfo] = useState({ open: false, data: null });
   const [lier, setlier] = useState({ open: false, data: null });
+  const [rightclick, setrightclick] = useState({ open: false, data: null, event : null });
 
   return (
     <div>
-      <Modal
-          link={{lier, setlier}}
-          info={modalInfo}></Modal>
-      <DisplayAllAffice
-          link={{ lier, setlier }}
+        <RenderRightClick data={rightclick} />
 
+      <Modal
+          rightclick={{rightclick, setrightclick}}
+        setinfo={{ modalInfo, setModalInfo }}
+        link={{ lier, setlier }}
+        info={modalInfo}
+      ></Modal>
+      <DisplayAllAffice
+        link={{ lier, setlier }}
         modalSetData={{ modalInfo, setModalInfo }}
+        rightclick={{rightclick, setrightclick}}
+
       ></DisplayAllAffice>
       <br />
       <GetSlide
-          link={{ lier, setlier }}
+        link={{ lier, setlier }}
         Data={homepage.recents}
         modalSetData={{ modalInfo, setModalInfo }}
+        rightclick={{rightclick, setrightclick}}
+
         key={homepage.recents.length}
         Raison="Recents"
       ></GetSlide>
       {MostViewedCatMovie.map((e) => {
         return (
           <GetSlide
-              link={{ lier, setlier }}
+            link={{ lier, setlier }}
             modalSetData={{ modalInfo, setModalInfo }}
+            rightclick={{rightclick, setrightclick}}
+
             Data={e.data}
             key={e.id}
             Raison={e.id}
@@ -138,7 +151,7 @@ function BuilDHomePage() {
       {MostViewedCatSeries.map((e) => {
         return (
           <GetSlide
-              link={{ lier, setlier }}
+            link={{ lier, setlier }}
             modalSetData={{ modalInfo, setModalInfo }}
             Data={e.data}
             Raison={e.id}
@@ -150,7 +163,6 @@ function BuilDHomePage() {
 }
 
 function DisplayAllAffice(args) {
-
   var item = random;
   var modaldata = args.modalSetData;
   var link = args.link;
@@ -187,7 +199,10 @@ function DisplayAllAffice(args) {
               if (modaldata.modalInfo.open) {
                 modaldata.setModalInfo({ open: false, data: null });
               } else {
-                modaldata.setModalInfo({ open: true, data: await loadItem(item.uuid) });
+                modaldata.setModalInfo({
+                  open: true,
+                  data: await loadItem(item.uuid),
+                });
 
                 document.addEventListener(
                   "scroll",
@@ -237,7 +252,7 @@ const get = function () {
       return element.Parsed.runtime || element.duration;
     },
     Overview: (element) => {
-      return  element.Parsed.overview;
+      return element.Parsed.overview;
     },
     Minia: {
       b: (element) => {
@@ -258,13 +273,13 @@ const get = function () {
 // console.log((document.body
 
 function App() {
-
-
   return <BuilDHomePage></BuilDHomePage>;
 }
 
 const Modal = function (data) {
   const soundElement = useRef();
+  const minfo = data.setinfo;
+  const portalref = useRef();
   const link = data.link;
   const videoElement = useRef();
   const funcHand = () => {
@@ -277,7 +292,6 @@ const Modal = function (data) {
     }
   };
   if (data.info.open) {
-
     var minWidth = 700;
     var maxWidth = 725;
     // setImmediate(async  () => {
@@ -295,10 +309,10 @@ const Modal = function (data) {
         : minWidth;
     const getHeight = () => window.innerHeight / 1.2;
 
-
     var info = data.info.data;
     return createPortal(
       <div
+        ref={portalref}
         className="animate__fadeInUp"
         style={{
           "animation-duration": "0.4s",
@@ -315,7 +329,7 @@ const Modal = function (data) {
           backgroundColor: "rgb(24, 24, 24)",
         }}
       >
-          <ArrierePlanFlou/>
+        <ArrierePlanFlou />
         <video
           ref={videoElement}
           style={{
@@ -338,6 +352,21 @@ const Modal = function (data) {
           />
           {/*<source src="/api/library/ba.mp4?mediauuid=e03c39ac-5bbe-41cd-91fb-c9c85c86c629#t=6">*/}
         </video>
+        <span
+          onClick={(e) => {
+            // minfo.setModalInfo({ open: false, data: null });
+
+            portalref.current.classList.remove("animate__fadeInUp");
+            portalref.current.style.setProperty("--animation-duration", "0.2s");
+            portalref.current.classList.add("animate__backOutDown");
+            setTimeout(() => {
+              minfo.setModalInfo({ open: false, data: null });
+            }, 199);
+          }}
+          style={{ position: "relative", top: "-355px", left: "660px" }}
+        >
+          <img style={{ height: "40px" }} src={closeModal} />
+        </span>
 
         <div
           style={{
@@ -359,15 +388,24 @@ const Modal = function (data) {
             }}
           />
         </div>
-          <GenIcons data={data.info.data}/>
-          <div>
-          <h5 style={{fontSize : "16px", position : "relative", top : "-145px", marginLeft : "10px", marginRight : "10px"}}>{get().Overview(data.info.data)}</h5>
-      </div>
+        <GenIcons data={data.info.data} />
+        <div>
+          <h5
+            style={{
+              fontSize: "16px",
+              position: "relative",
+              top: "-145px",
+              marginLeft: "10px",
+              marginRight: "10px",
+            }}
+          >
+            {get().Overview(data.info.data)}
+          </h5>
+        </div>
       </div>,
 
       document.body
     );
-
   } else {
     return <div></div>;
   }
@@ -383,33 +421,138 @@ const Modal = function (data) {
 // width: var(--largeur-video);
 // top: -150px;*
 
-
-
-
-
-
-const ArrierePlanFlou = function ()
-{
-    return createPortal(<div  style={{position : "absolute", top : window.scrollY +  "px", height : "100%", width : "100%", left : "0px", backgroundColor : "rgba(0, 0, 0, 0.7)", zIndex : 3}}></div>, document.body)
-}
+const ArrierePlanFlou = function () {
+  return createPortal(
+    <div
+      style={{
+        position: "absolute",
+        top: window.scrollY + "px",
+        height: "100%",
+        width: "100%",
+        left: "0px",
+        backgroundColor: "rgba(0, 0, 0, 0.7)",
+        zIndex: 3,
+      }}
+    ></div>,
+    document.body
+  );
+};
 
 const GenIcons = function (v) {
-    const data = v.data;
-    const Match = "54";
-    return (<div>
-        <span style={{fontWeight : 800, position : "relative", left : "10px", fontFamily : "'Roboto', sans-serif", color : "#46d369", top : "-155px", zIndex : 4}}>{Match}% Match</span>
-        <span style={{fontFamily : "'Roboto', sans-serif", position : "relative", top : "-155px", left : "18px", fontWeight : 1000 , zIndex : 4}}>2019</span>
-        <span style={{ fontWeight : 1000, color : "white", left : "25px", top : "-155px", position : "relative", zIndex : 4,  fontFamily : "'Roboto', sans-serif"}}><img alt="failed load img" style={{height : "25px", verticalAlign : "-7px"}} src={fourk} /></span>
-        <span style={{position : "relative", top : "-155px", left : '32px', fontWeight : 1000, color : "white", fontFamily :  "'Roboto', sans-serif", border : "solid 1px color", backgroundColor : "red", borderRadius : "5px", padding : "4px", zIndex : 4}}>+ 17</span>
-        <span style={{position : "relative", top : "-155px", left : "40px", fontWeight : 1000, color : "white", fontFamily : "'Roboto', sans-serif", zIndex : 4}}>1h 30min</span>
-        <span onMouseOver={(e) => { console.log(data.ffprobe)}} style={{position : "relative", top : "-155px", left : "50px", fontWeight : 1000, color : "white", fontFamily : "'Roboto', sans-serif", zIndex : 4}}><img alt="image not loaded" style={{ height : "25px", verticalAlign : "top"}} src={audio}/></span>
-        <span style={{position : "relative", top : "-155px", left : "60px", color : "white", fontFamily : "'Roboto', sans-serif", zIndex : 4}} onClick={(e) => { download(data) }}><img style={{height : "22px"}} src={dl}/></span>
-
-
-
-    </div>);
-
-}
+  const data = v.data;
+  const Match = "54";
+  return (
+    <div>
+      <span
+        style={{
+          fontWeight: 800,
+          position: "relative",
+          left: "10px",
+          fontFamily: "'Roboto', sans-serif",
+          color: "#46d369",
+          top: "-155px",
+          zIndex: 4,
+        }}
+      >
+        {Match}% Match
+      </span>
+      <span
+        style={{
+          fontFamily: "'Roboto', sans-serif",
+          position: "relative",
+          top: "-155px",
+          left: "18px",
+          fontWeight: 1000,
+          zIndex: 4,
+        }}
+      >
+        2019
+      </span>
+      <span
+        style={{
+          fontWeight: 1000,
+          color: "white",
+          left: "25px",
+          top: "-155px",
+          position: "relative",
+          zIndex: 4,
+          fontFamily: "'Roboto', sans-serif",
+        }}
+      >
+        <img
+          alt="failed load img"
+          style={{ height: "25px", verticalAlign: "-7px" }}
+          src={fourk}
+        />
+      </span>
+      <span
+        style={{
+          position: "relative",
+          top: "-155px",
+          left: "32px",
+          fontWeight: 1000,
+          color: "white",
+          fontFamily: "'Roboto', sans-serif",
+          border: "solid 1px color",
+          backgroundColor: "red",
+          borderRadius: "5px",
+          padding: "4px",
+          zIndex: 4,
+        }}
+      >
+        + 17
+      </span>
+      <span
+        style={{
+          position: "relative",
+          top: "-155px",
+          left: "40px",
+          fontWeight: 1000,
+          color: "white",
+          fontFamily: "'Roboto', sans-serif",
+          zIndex: 4,
+        }}
+      >
+        1h 30min
+      </span>
+      <span
+        onMouseOver={(e) => {
+          console.log(data.ffprobe);
+        }}
+        style={{
+          position: "relative",
+          top: "-155px",
+          left: "50px",
+          fontWeight: 1000,
+          color: "white",
+          fontFamily: "'Roboto', sans-serif",
+          zIndex: 4,
+        }}
+      >
+        <img
+          alt="image not loaded"
+          style={{ height: "25px", verticalAlign: "top" }}
+          src={audio}
+        />
+      </span>
+      <span
+        style={{
+          position: "relative",
+          top: "-155px",
+          left: "60px",
+          color: "white",
+          fontFamily: "'Roboto', sans-serif",
+          zIndex: 4,
+        }}
+        onClick={(e) => {
+          download(data);
+        }}
+      >
+        <img style={{ height: "22px" }} src={dl} />
+      </span>
+    </div>
+  );
+};
 const OverPlayer = function (data) {
   const element = data.data.element;
   const videoEl = data.data.videoElement;
@@ -427,7 +570,9 @@ const OverPlayer = function (data) {
           fontSize: "30px",
         }}
       >
-        {get().Name(element).length > 20 ? get().Name(element).substr(0, 17) + "..." : get().Name(element)}
+        {get().Name(element).length > 20
+          ? get().Name(element).substr(0, 17) + "..."
+          : get().Name(element)}
       </h5>
       <button
         style={{
@@ -497,13 +642,13 @@ const OverPlayer = function (data) {
 const GetSlide = (data) => {
   // console.log((data))
 
-
   var ElementArray = data.Data;
 
   var Raison = "Pas de raison";
   var link = data.link;
   const modalData = data.modalSetData.modalInfo;
   const setModalData = data.modalSetData.setModalInfo;
+  const rightclick = data.rightclick;
 
   return (
     <div>
@@ -560,6 +705,16 @@ const GetSlide = (data) => {
                 style={{ textAlign: "center" }}
                 className="contener-data"
                 key={element.uuid + "_div"}
+                onContextMenu={(e) => {
+                    e.preventDefault();
+                    rightclick.setrightclick({open : false, data : null, event : null});
+                    setTimeout(() => {
+                        rightclick.setrightclick({open: true, data: element, event: e})
+                    }, 50)
+
+
+                }
+                }
                 onClick={(e) => {
                   // setModalInfo(true, "data",
                   //"dat");
@@ -567,13 +722,13 @@ const GetSlide = (data) => {
                   if (modalData.open) {
                     setModalData({ open: false, data: null });
                   }
-                  setTimeout(async  () => {
+                  setTimeout(async () => {
                     setModalData({
                       open: true,
                       data: await loadItem(element.uuid),
                       onscroll: async (e) => {
                         console.log("scroll");
-                        setModalData({ open: false, data: null  });
+                        setModalData({ open: false, data: null });
                       },
                     });
                   }, 50);
@@ -638,29 +793,95 @@ const GetSlide = (data) => {
 //
 //
 // }
+function handleMouseMove(event) {
+    var dot, eventDoc, doc, body, pageX, pageY;
 
+    event = event || window.event; // IE-ism
 
+    // If pageX/Y aren't available and clientX/Y are,
+    // calculate pageX/Y - logic taken from jQuery.
+    // (This is to support old IE)
+    if (event.pageX == null && event.clientX != null) {
+        eventDoc = (event.target && event.target.ownerDocument) || document;
+        doc = eventDoc.documentElement;
+        body = eventDoc.body;
 
-function  download(item)
+        event.pageX = event.clientX +
+            (doc && doc.scrollLeft || body && body.scrollLeft || 0) -
+            (doc && doc.clientLeft || body && body.clientLeft || 0);
+        event.pageY = event.clientY +
+            (doc && doc.scrollTop || body && body.scrollTop || 0) -
+            (doc && doc.clientTop || body && body.clientTop || 0);
+    }
+
+    var mousePos = {
+        x: event.pageX,
+        y: event.pageY
+    };
+    return mousePos
+}
+function RenderRightClick(data)
 {
-    console.log("Downloading item", item);
-    return document.location.href = 'http://localhost/api/download?itemuuid='+item.uuid;
+    // {getRIght event}
+    const event = data.data.event
+    const right = data.data.right;
+    const element = data.data.data;
+    const open = data.data.open;
+    if(open === false)
+    {
+        console.log(("Not open returning"))
+        return <div></div>;
+    }
+
+
+console.log("rendering right click", data);
+    console.log(handleMouseMove(event).x, handleMouseMove(event).y)
+
+    const styleDif = {
+        weight : "100%",
+        height : "14%",
+        // verticalAlign : "",
+        // textAlign : "center",
+        // marginTop : "10px",
+        lineHeight : "1em"
+
+    }
+
+    return createPortal(
+        <div  onClick={(e) => {
+            // console.log((event), right);
+            console.log("right clicked element");
+
+        }} className="animate__animated animate__zoomIn" style={{ borderRadius : "5px", "animation-duration" :"0.2s",backgroundColor : "rgb(40, 40, 43)", height : "140px", width : "200px", position :"absolute", top : handleMouseMove(event).y + "px", left : handleMouseMove(event).x + "px", zIndex : 5 }}>
+       <table style={{ width : "100%", height :"100%" }}>
+
+           <tr style={styleDif} onClick={(e) => { Open(element)}}>Lire</tr>
+            <tr style={styleDif} onClick={(e) => { download(element)}}>Telecharger</tr>
+            <tr style={styleDif}>Convertir</tr>
+            <tr style={styleDif}>Associer</tr>
+            <tr style={styleDif}>Bouger</tr>
+       </table>
+
+        </div>
+
+    , document.body);
+
+    // return <div>cocasse</div>
 }
 
-async function lier(itemuuid, type){
+function Open(element){
 
-
-
-
+console.log("streaming", element);
+}
+function download(item) {
+  console.log("Downloading item", item);
+  return (document.location.href =
+    "http://localhost/api/download?itemuuid=" + item.uuid);
 }
 
-
-
-
+async function lier(itemuuid, type) {}
 
 Main().then(() => {
-
-
   root.render(
     <div>
       <BuilDHomePage />
