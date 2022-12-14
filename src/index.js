@@ -9,11 +9,18 @@ import { Animated } from "react-animated-css";
 import "./global.css";
 import { useState, useEffect, useRef } from "react";
 import { Portal } from "react-portal";
+import play from "./play.svg";
+import addtol from "./addtol.svg";
+import muted from "./muted.svg";
+import sound from "./sound.svg";
+import like from "./like.svg";
 import "animate.css";
 import { useDispatch, useSelector } from "react-redux";
 import LazyLoad from "react-lazy-load";
 import React from "react";
-import iziToast from "izitoast";
+import { ToastContainer, toast } from "react-toastify";
+import fourk from "./quality/no.svg";
+// import "react-toastify/dist/ReactToastify.css";
 
 const root = ReactDom.createRoot(document.getElementById("root"));
 console.log(document.getElementById("root"));
@@ -73,6 +80,7 @@ const loadHomepage = function () {
   });
 };
 async function loadItem(item_uuid) {
+    console.log(("fetching item"))
   var res = await axios
     .get("http://localhost/api/library/item?itemuuid=" + item_uuid)
     .catch((e) => HandLeError(e, "item"));
@@ -136,6 +144,7 @@ function BuilDHomePage() {
 }
 
 function DisplayAllAffice(args) {
+
   var item = random;
   var modaldata = args.modalSetData;
   return (
@@ -149,7 +158,7 @@ function DisplayAllAffice(args) {
             fontWeight: "bold",
           }}
         >
-          {get().Name(item) + " - Made With React.js"}
+          {get().Name(item)}
           <span></span>
         </span>
         <br />
@@ -167,11 +176,12 @@ function DisplayAllAffice(args) {
           <br />
           <button
             className="centka"
-            onClick={() => {
+            onClick={async () => {
               if (modaldata.modalInfo.open) {
                 modaldata.setModalInfo({ open: false, data: null });
               } else {
-                modaldata.setModalInfo({ open: true, data: item });
+                modaldata.setModalInfo({ open: true, data: await loadItem(item.uuid) });
+
                 document.addEventListener(
                   "scroll",
                   function scrollHandlerevent(e) {
@@ -221,7 +231,7 @@ const get = function () {
       return element.Parsed.runtime || element.duration;
     },
     Overview: (element) => {
-      return element.Parsed.overview;
+      return  element.Parsed.overview;
     },
     Minia: {
       b: (element) => {
@@ -239,19 +249,44 @@ const get = function () {
   };
 };
 
-// console.log((document.body))
+// console.log((document.body
 
 function App() {
+
+
   return <BuilDHomePage></BuilDHomePage>;
 }
 
 const Modal = function (data) {
   // console.log('OPEN MODAL', data);
+
+  const soundElement = useRef();
+  const videoElement = useRef();
+  const funcHand = () => {
+    console.log(
+      "click on image whitch change the muted",
+      soundElement,
+      videoElement
+    );
+    if (videoElement.current.muted == true) {
+      soundElement.current.src = sound;
+      videoElement.current.muted = false;
+    } else {
+      soundElement.current.src = muted;
+      videoElement.current.muted = true;
+    }
+  };
   if (data.info.open) {
     // console.log("Open modal with data Hauteur : ", document.body.clientHeight + "px", "Largeur : ", document.body.clientWidth + "px", "EXTEND", document.body.clientHeight );
 
     var minWidth = 700;
-    var maxWidth = 800;
+    var maxWidth = 725;
+    // setImmediate(async  () => {
+    //
+    //
+    //
+    // });
+    //
 
     const getWidth = () =>
       window.innerWidth / 2 > minWidth
@@ -264,7 +299,6 @@ const Modal = function (data) {
     console.log(getWidth(), getHeight());
 
     var info = data.info.data;
-
     return createPortal(
       <div
         className="animate__fadeInUp"
@@ -274,6 +308,7 @@ const Modal = function (data) {
           zIndex: 1,
           position: "absolute",
           borderRadius: "10px",
+
           height: getHeight() + "px",
           width: getWidth() + "px",
           top: window.scrollY + getHeight() / 8 + "px",
@@ -283,24 +318,21 @@ const Modal = function (data) {
         }}
       >
         <video
+          ref={videoElement}
           style={{
-            maxWidth: getWidth() + "px",
+            width: getWidth() + "px",
+            height: getHeight() / 2 + "px",
             borderTopLeftRadius: "10px",
             borderTopRightRadius: "10px",
             display: "block",
             objectFit: "contain",
           }}
+          onError={(e) => {
+            console.log("Failed to load video", e.target.src);
+          }}
           autoPlay={true}
           loop={true}
           muted={true}
-          onError={(e) => {
-            console.log("failed while loading bande annonce");
-            console.log(e);
-            iziToast.error({
-              message: "failed while loading bande annonce",
-              title: "error while loading bande annonce",
-            });
-          }}
         >
           <source
             src={"http://localhost/api/library/ba.mp4?mediauuid=" + info.uuid}
@@ -308,21 +340,149 @@ const Modal = function (data) {
           {/*<source src="/api/library/ba.mp4?mediauuid=e03c39ac-5bbe-41cd-91fb-c9c85c86c629#t=6">*/}
         </video>
 
-          <div style={{ zIndex : 2,
-              background : `linear-gradient(to bottom, rgba(255, 255, 255, 0) 70%, #181818 100%)`,
-              // backgroundColor : "red",
-              height : '150px', position : 'relative', width : getWidth() + "px", top : "-100px"}}>
-
-          </div>
-
+        <div
+          style={{
+            zIndex: 2,
+            background: `linear-gradient(to bottom, rgba(255, 255, 255, 0) 0%, #181818 100%)`,
+            // backgroundColor : "red",
+            height: "150px",
+            position: "relative",
+            width: getWidth() + "px",
+            top: "-147px",
+          }}
+        >
+          <OverPlayer
+            data={{
+              element: data.info.data,
+              videoElement,
+              soundElement,
+              funcHand,
+            }}
+          />
+        </div>
+          <GenIcons data={data.info.data}/>
+          <div>
+          <h5 style={{fontSize : "16px", position : "relative", top : "-145px", marginLeft : "10px", marginRight : "10px"}}>{get().Overview(data.info.data)}</h5>
+      </div>
       </div>,
 
       document.body
     );
+
   } else {
     console.log("Closing Modal");
     return <div></div>;
   }
+};
+// --animate-delay: 1s;
+// --animate-repeat: 1;
+// color: #e5e5e5;
+// user-select: none;
+// --animate-duration: 0.4s;
+// background: linear-gradient(to bottom, rgba(255, 255, 255, 0) 20%, #181818 100%);
+// height: 150px;
+// position: relative;
+// width: var(--largeur-video);
+// top: -150px;
+
+const GenIcons = function (v) {
+    const data = v.data;
+    const Match = "54";
+    return (<div>
+        <span style={{fontWeight : 800, position : "relative", left : "-80px", fontFamily : "'Roboto', sans-serif", color : "#46d369", top : "-155px", zIndex : 4}}>{Match}%</span>
+        <span style={{fontFamily : "'Roboto', sans-serif", position : "relative", top : "-155px", left : "-70px", fontWeight : 1000 , zIndex : 4}}>2019</span>
+        <span style={{ fontWeight : 1000, color : "white", left : "-60px", top : "-155px", position : "relative", zIndex : 4,  fontFamily : "'Roboto', sans-serif"}}><img alt="failed load img" style={{height : "25px", verticalAlign : "-7px"}} src={fourk} /></span>
+
+        <span style={{position : "relative", top : "-155px", left : '-50px', fontWeight : 1000, color : "white", fontFamily :  "'Roboto', sans-serif", border : "solid 1px color", backgroundColor : "red", borderRadius : "5px", padding : "4px", zIndex : 4}}>+ 17</span>
+
+
+
+    </div>);
+
+}
+const OverPlayer = function (data) {
+  const element = data.data.element;
+  const videoEl = data.data.videoElement;
+  const soundEl = data.data.soundElement;
+  const handeleImg = data.data.funcHand;
+  console.log(data);
+  return (
+    <div>
+      <h5
+        style={{
+          position: "relative",
+          top: "30px",
+          left: "20px",
+          fontWeight: "800",
+          fontFamily: "'Roboto', sans-serif",
+          fontSize: "30px",
+        }}
+      >
+        {get().Name(element).length > 20 ? get().Name(element).substr(0, 17) + "..." : get().Name(element)}
+      </h5>
+      <button
+        style={{
+          position: "relative",
+          top: "40px",
+          left: "20px",
+          backgroundColor: "white",
+          border: "none",
+          borderRadius: "4px",
+          width: "110px",
+          height: "42px",
+          fontWeight: "800",
+          fontFamily: "'Roboto', sans-serif",
+          fontSize: "16px",
+        }}
+      >
+        <img
+          alt="img not found"
+          style={{ verticalAlign: "middle", width: "24px", height: "24px" }}
+          src={play}
+        />
+        Play
+      </button>
+
+      <button
+        style={{
+          position: "relative",
+          top: "40px",
+          left: "18px",
+          border: "none",
+          borderRadius: "4px",
+          background: "transparent",
+        }}
+      >
+        <img style={{ height: "40px" }} alt="failed load image" src={addtol} />
+      </button>
+      <button
+        style={{
+          border: "none",
+          position: "relative",
+          top: "40px",
+          left: "14px",
+          background: "transparent",
+          borderRadius: "4px",
+        }}
+      >
+        <img style={{ height: "40px" }} src={like} />
+      </button>
+
+      <button
+        style={{
+          border: "none",
+          background: "transparent",
+          position: "relative",
+
+          top: "40px",
+          left: "425px",
+        }}
+        onClick={handeleImg}
+      >
+        <img ref={soundEl} style={{ height: "40px" }} src={muted} />
+      </button>
+    </div>
+  );
 };
 
 const GetSlide = (data) => {
@@ -395,13 +555,13 @@ const GetSlide = (data) => {
                   if (modalData.open) {
                     setModalData({ open: false, data: null });
                   }
-                  setTimeout(() => {
+                  setTimeout(async  () => {
                     setModalData({
                       open: true,
-                      data: element,
-                      onscroll: (e) => {
+                      data: await loadItem(element.uuid),
+                      onscroll: async (e) => {
                         console.log("scroll");
-                        setModalData({ open: false, data: null });
+                        setModalData({ open: false, data: null  });
                       },
                     });
                   }, 50);

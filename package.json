@@ -17,6 +17,7 @@
     "react-portal": "^4.2.2",
     "react-redux": "^8.0.5",
     "react-scripts": "5.0.1",
+    "react-toastify": "^9.1.1",
     "reapop": "^4.2.0",
     "sweetalert2": "^11.6.15",
     "sweetalert2-react-content": "^5.0.7",
