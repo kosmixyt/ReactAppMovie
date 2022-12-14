@@ -7,12 +7,14 @@ import ReactDom, { createPortal } from "react-dom";
 import withReactContent from "sweetalert2-react-content";
 import { Animated } from "react-animated-css";
 import "./global.css";
+import dl from './dl.svg';
 import { useState, useEffect, useRef } from "react";
 import { Portal } from "react-portal";
 import play from "./play.svg";
 import addtol from "./addtol.svg";
 import muted from "./muted.svg";
 import sound from "./sound.svg";
+import audio from './audio.svg'
 import like from "./like.svg";
 import "animate.css";
 import { useDispatch, useSelector } from "react-redux";
@@ -23,7 +25,6 @@ import fourk from "./quality/no.svg";
 // import "react-toastify/dist/ReactToastify.css";
 
 const root = ReactDom.createRoot(document.getElementById("root"));
-console.log(document.getElementById("root"));
 
 let homepage = [];
 const maxWidthVideo = "800;";
@@ -31,7 +32,6 @@ let random = {};
 
 async function Tasks() {
   let tasks = (await axios.get("http://localhost/api/tasks")).data.data;
-  console.log(tasks);
 }
 
 const HandLeError = function (typeError, type) {
@@ -69,7 +69,6 @@ const loadHomepage = function () {
       .get("http://localhost:80/api/homepage")
       .then((res) => {
         homepage = res.data.data;
-        console.log(homepage);
         console.log("SuccessFully Loaded Homepage");
         r();
       })
@@ -97,7 +96,6 @@ async function Main() {
   await Tasks();
   await loadHomepage();
   random = await loadRandom();
-  console.log(homepage);
 }
 
 // console.log(DisplayAllAffice())
@@ -106,25 +104,33 @@ function BuilDHomePage() {
   var MostViewedCatMovie = homepage.arrayofMostf;
   var MostViewedCatSeries = homepage.arrayofMosts;
   const [modalInfo, setModalInfo] = useState({ open: false, data: null });
+  const [lier, setlier] = useState({ open: false, data: null });
 
   return (
     <div>
-      <Modal info={modalInfo}></Modal>
+      <Modal
+          link={{lier, setlier}}
+          info={modalInfo}></Modal>
       <DisplayAllAffice
+          link={{ lier, setlier }}
+
         modalSetData={{ modalInfo, setModalInfo }}
       ></DisplayAllAffice>
       <br />
       <GetSlide
+          link={{ lier, setlier }}
         Data={homepage.recents}
         modalSetData={{ modalInfo, setModalInfo }}
+        key={homepage.recents.length}
         Raison="Recents"
       ></GetSlide>
       {MostViewedCatMovie.map((e) => {
         return (
           <GetSlide
+              link={{ lier, setlier }}
             modalSetData={{ modalInfo, setModalInfo }}
-            key={e.id}
             Data={e.data}
+            key={e.id}
             Raison={e.id}
           ></GetSlide>
         );
@@ -132,8 +138,8 @@ function BuilDHomePage() {
       {MostViewedCatSeries.map((e) => {
         return (
           <GetSlide
+              link={{ lier, setlier }}
             modalSetData={{ modalInfo, setModalInfo }}
-            key={e.id}
             Data={e.data}
             Raison={e.id}
           ></GetSlide>
@@ -147,6 +153,7 @@ function DisplayAllAffice(args) {
 
   var item = random;
   var modaldata = args.modalSetData;
+  var link = args.link;
   return (
     <div>
       <div style={{ display: "inline-block", height: "70vh", width: "26%" }}>
@@ -185,7 +192,6 @@ function DisplayAllAffice(args) {
                 document.addEventListener(
                   "scroll",
                   function scrollHandlerevent(e) {
-                    console.log("body scrolled removing modal");
                     document.removeEventListener("scroll", scrollHandlerevent);
 
                     modaldata.setModalInfo({ open: false, data: null });
@@ -258,16 +264,10 @@ function App() {
 }
 
 const Modal = function (data) {
-  // console.log('OPEN MODAL', data);
-
   const soundElement = useRef();
+  const link = data.link;
   const videoElement = useRef();
   const funcHand = () => {
-    console.log(
-      "click on image whitch change the muted",
-      soundElement,
-      videoElement
-    );
     if (videoElement.current.muted == true) {
       soundElement.current.src = sound;
       videoElement.current.muted = false;
@@ -277,7 +277,6 @@ const Modal = function (data) {
     }
   };
   if (data.info.open) {
-    // console.log("Open modal with data Hauteur : ", document.body.clientHeight + "px", "Largeur : ", document.body.clientWidth + "px", "EXTEND", document.body.clientHeight );
 
     var minWidth = 700;
     var maxWidth = 725;
@@ -296,7 +295,6 @@ const Modal = function (data) {
         : minWidth;
     const getHeight = () => window.innerHeight / 1.2;
 
-    console.log(getWidth(), getHeight());
 
     var info = data.info.data;
     return createPortal(
@@ -305,7 +303,7 @@ const Modal = function (data) {
         style={{
           "animation-duration": "0.4s",
 
-          zIndex: 1,
+          zIndex: 4,
           position: "absolute",
           borderRadius: "10px",
 
@@ -317,6 +315,7 @@ const Modal = function (data) {
           backgroundColor: "rgb(24, 24, 24)",
         }}
       >
+          <ArrierePlanFlou/>
         <video
           ref={videoElement}
           style={{
@@ -370,7 +369,6 @@ const Modal = function (data) {
     );
 
   } else {
-    console.log("Closing Modal");
     return <div></div>;
   }
 };
@@ -383,17 +381,29 @@ const Modal = function (data) {
 // height: 150px;
 // position: relative;
 // width: var(--largeur-video);
-// top: -150px;
+// top: -150px;*
+
+
+
+
+
+
+const ArrierePlanFlou = function ()
+{
+    return createPortal(<div  style={{position : "absolute", top : window.scrollY +  "px", height : "100%", width : "100%", left : "0px", backgroundColor : "rgba(0, 0, 0, 0.7)", zIndex : 3}}></div>, document.body)
+}
 
 const GenIcons = function (v) {
     const data = v.data;
     const Match = "54";
     return (<div>
-        <span style={{fontWeight : 800, position : "relative", left : "-80px", fontFamily : "'Roboto', sans-serif", color : "#46d369", top : "-155px", zIndex : 4}}>{Match}%</span>
-        <span style={{fontFamily : "'Roboto', sans-serif", position : "relative", top : "-155px", left : "-70px", fontWeight : 1000 , zIndex : 4}}>2019</span>
-        <span style={{ fontWeight : 1000, color : "white", left : "-60px", top : "-155px", position : "relative", zIndex : 4,  fontFamily : "'Roboto', sans-serif"}}><img alt="failed load img" style={{height : "25px", verticalAlign : "-7px"}} src={fourk} /></span>
-
-        <span style={{position : "relative", top : "-155px", left : '-50px', fontWeight : 1000, color : "white", fontFamily :  "'Roboto', sans-serif", border : "solid 1px color", backgroundColor : "red", borderRadius : "5px", padding : "4px", zIndex : 4}}>+ 17</span>
+        <span style={{fontWeight : 800, position : "relative", left : "10px", fontFamily : "'Roboto', sans-serif", color : "#46d369", top : "-155px", zIndex : 4}}>{Match}% Match</span>
+        <span style={{fontFamily : "'Roboto', sans-serif", position : "relative", top : "-155px", left : "18px", fontWeight : 1000 , zIndex : 4}}>2019</span>
+        <span style={{ fontWeight : 1000, color : "white", left : "25px", top : "-155px", position : "relative", zIndex : 4,  fontFamily : "'Roboto', sans-serif"}}><img alt="failed load img" style={{height : "25px", verticalAlign : "-7px"}} src={fourk} /></span>
+        <span style={{position : "relative", top : "-155px", left : '32px', fontWeight : 1000, color : "white", fontFamily :  "'Roboto', sans-serif", border : "solid 1px color", backgroundColor : "red", borderRadius : "5px", padding : "4px", zIndex : 4}}>+ 17</span>
+        <span style={{position : "relative", top : "-155px", left : "40px", fontWeight : 1000, color : "white", fontFamily : "'Roboto', sans-serif", zIndex : 4}}>1h 30min</span>
+        <span onMouseOver={(e) => { console.log(data.ffprobe)}} style={{position : "relative", top : "-155px", left : "50px", fontWeight : 1000, color : "white", fontFamily : "'Roboto', sans-serif", zIndex : 4}}><img alt="image not loaded" style={{ height : "25px", verticalAlign : "top"}} src={audio}/></span>
+        <span style={{position : "relative", top : "-155px", left : "60px", color : "white", fontFamily : "'Roboto', sans-serif", zIndex : 4}} onClick={(e) => { download(data) }}><img style={{height : "22px"}} src={dl}/></span>
 
 
 
@@ -405,7 +415,6 @@ const OverPlayer = function (data) {
   const videoEl = data.data.videoElement;
   const soundEl = data.data.soundElement;
   const handeleImg = data.data.funcHand;
-  console.log(data);
   return (
     <div>
       <h5
@@ -487,9 +496,12 @@ const OverPlayer = function (data) {
 
 const GetSlide = (data) => {
   // console.log((data))
+
+
   var ElementArray = data.Data;
 
   var Raison = "Pas de raison";
+  var link = data.link;
   const modalData = data.modalSetData.modalInfo;
   const setModalData = data.modalSetData.setModalInfo;
 
@@ -627,7 +639,28 @@ const GetSlide = (data) => {
 //
 // }
 
+
+
+function  download(item)
+{
+    console.log("Downloading item", item);
+    return document.location.href = 'http://localhost/api/download?itemuuid='+item.uuid;
+}
+
+async function lier(itemuuid, type){
+
+
+
+
+}
+
+
+
+
+
 Main().then(() => {
+
+
   root.render(
     <div>
       <BuilDHomePage />
