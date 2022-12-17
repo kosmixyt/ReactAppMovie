@@ -9,7 +9,10 @@
     "animate.css": "^4.1.1",
     "axios": "^1.2.1",
     "bootstrap": "^5.2.3",
+    "hls.js": "^1.2.9",
     "izitoast": "^1.4.0",
+    "plyr": "^3.7.3",
+    "plyr-react": "^5.1.2",
     "react": "^18.2.0",
     "react-animated-css": "^1.2.1",
     "react-dom": "^18.2.0",
@@ -22,6 +25,7 @@
     "sweetalert2": "^11.6.15",
     "sweetalert2-react-content": "^5.0.7",
     "swiper": "^8.4.5",
+    "video.js": "^7.20.3",
     "web-vitals": "^2.1.4"
   },
   "scripts": {

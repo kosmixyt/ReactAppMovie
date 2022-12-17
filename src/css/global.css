@@ -10,6 +10,16 @@ body {
   user-select: none;
 }
 
+.search_prop:hover{
+
+  border: 1px solid white;
+
+}
+.search_prop{
+
+  border: 1px solid transparent;
+
+}
 .swiper-container {
   width: 480px;
 }
@@ -38,11 +48,19 @@ body {
 
 .contener-data {
   margin: 0px;
+  border: 1px solid transparent;
+
+
+
+}
+.contener-data:hover{
+  border : 1px solid white;
+
 }
 
 .contener-data-title {
   font-family: "FTY SKORZHEN NCV", sans-serif;
-  font-size: 117%;
+  font-size: 2vh;
 }
 .contener-data-title:hover {
   text-decoration: underline;
