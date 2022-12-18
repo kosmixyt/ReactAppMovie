@@ -30,6 +30,7 @@ export function BuilDHomePage() {
         player={{ modalPlayer, setmodalPlayer }}
         data={rightclick}
         set={setrightclick}
+        cocasse={'cocasse'}
       />
 
       <Modal
